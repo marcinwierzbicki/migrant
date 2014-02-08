@@ -3,6 +3,13 @@ require 'term/ansicolor'
 
 module Migrant
   class MigrationGenerator
+    def class_exists?(class_name)
+      klass = Module.const_get(class_name)
+      return klass.is_a?(Class)
+    rescue NameError
+      return false
+    end
+ 
     def run
       # Ensure db/migrate path exists before starting
       FileUtils.mkdir_p(Rails.root.join('db', 'migrate'))
@@ -24,7 +31,7 @@ module Migrant
 
       Dir["#{model_root}**/*.rb"].each do |file|
         if (model_name = file.sub(model_root, '').match(/(.*)?\.rb$/))
-          model_name[1].camelize.safe_constantize
+          class_exists?(model_name[1].camelize.to_s)
         end
       end
 
